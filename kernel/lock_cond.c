@@ -6,18 +6,7 @@
  */
 
 #include "lock_cond.h"
-
-int lock_reset(lock_t *lock){
-
-}
-
-void lock_acquire(lock_t *lock){
-
-}
-
-void lock_release(lock_t *lock){
-
-}
+#include "lock.h"
 
 
 int condition_reset(cond_t *cond){
