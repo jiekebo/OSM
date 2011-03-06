@@ -12,21 +12,24 @@
 #include "kernel/lock_cond.h"
 
 int condition_reset(cond_t *cond){
-	cond = cond;
-	return 0;
+	sleepq_wake_all(cond);
+    return 0;
 }
 
 void condition_wait(cond_t * cond, lock_t *condition_lock){
-	cond = cond;
-	condition_lock = condition_lock;
+	interrupt_status_t intr_status = _interrupt_disable();
+	sleepq_add(cond);
+	_interrupt_set_state(intr_status);
+	lock_release(condition_lock);
+	thread_switch();
 }
 
 void condition_signal(cond_t *cond, lock_t *condition_lock){
-	cond = cond;
 	condition_lock = condition_lock;
+	sleepq_wake(cond);
 }
 
 void condition_broadcast(cond_t *cond, lock_t *condition_lock){
-	cond = cond;
 	condition_lock = condition_lock;
+	sleepq_wake_all(cond);
 }
