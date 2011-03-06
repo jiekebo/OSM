@@ -2,7 +2,9 @@
 *.swp
 *.o
 *.d
+*.map
 .cproject
 .project
 .cvsignore
 /fyams.socket
+/buenos

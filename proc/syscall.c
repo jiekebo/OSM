@@ -44,6 +44,9 @@
 #include "kernel/assert.h"
 #include "proc/process.h"
 
+#include "kernel/lock.h"
+#include "kernel/lock_cond.h"
+
 void syscall_exit(int retval)
 {
     process_finish(retval);
@@ -91,6 +94,34 @@ int syscall_fork(void (*func)(int), int arg)
     } else {
         return -1;
     }
+}
+
+int syscall_lock_create(usr_lock_t *lock){
+	return 0;
+}
+
+void syscall_lock_acquire(usr_lock_t *lock) {
+  return lock_acquire(lock);
+}
+
+void syscall_lock_release(usr_lock_t *lock){
+	return;
+}
+
+int syscall_condition_create(usr_cond_t *cond){
+	return 0;
+}
+
+void syscall_condition_wait(usr_cond_t *cond, usr_lock_t *lock){
+
+}
+
+void syscall_condtition_signal(usr_cond_t *cond, usr_lock_t *lock){
+
+}
+
+void syscall_condition_broadcast(usr_cond_t *cond, usr_lock_t *lock){
+
 }
 
 /**
@@ -143,6 +174,22 @@ void syscall_handle(context_t *user_context)
             syscall_fork((void (*)(int))user_context->cpu_regs[MIPS_REGISTER_A1],
                          user_context->cpu_regs[MIPS_REGISTER_A2]);
         break;
+    case SYSCALL_LOCK_CREATE:
+
+    	break;
+    case SYSCALL_LOCK_ACQUIRE:
+    	syscall_lock_acquire((usr_lock_t*)user_context->cpu_regs[MIPS_REGISTER_A1]);
+    	break;
+    case SYSCALL_LOCK_RELEASE:
+    	break;
+    case SYSCALL_CONDITION_CREATE:
+    	break;
+    case SYSCALL_CONDITION_WAIT:
+    	break;
+    case SYSCALL_CONDITION_SIGNAL:
+    	break;
+    case SYSCALL_CONDITION_BROADCAST:
+    	break;
     default:
         KERNEL_PANIC("Unhandled system call\n");
     }
