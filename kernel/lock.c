@@ -7,6 +7,7 @@
 
 #include "kernel/interrupt.h"
 #include "kernel/sleepq.h"
+#include "kernel/thread.h"
 #include "kernel/lock.h"
 
 int lock_reset(lock_t *lock){

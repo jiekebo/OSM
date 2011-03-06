@@ -9,7 +9,6 @@
 #define LOCK_COND_H_
 
 #include "kernel/spinlock.h"
-#include "kernel/thread.h"
 
 typedef struct {
 	spinlock_t spinlock;
