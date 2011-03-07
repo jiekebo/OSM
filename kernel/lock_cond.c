@@ -18,10 +18,13 @@ int condition_reset(cond_t *cond){
 
 void condition_wait(cond_t * cond, lock_t *condition_lock){
 	interrupt_status_t intr_status = _interrupt_disable();
+
 	sleepq_add(cond);
-	_interrupt_set_state(intr_status);
 	lock_release(condition_lock);
 	thread_switch();
+	lock_acquire(condition_lock);
+
+	_interrupt_set_state(intr_status);
 }
 
 void condition_signal(cond_t *cond, lock_t *condition_lock){
