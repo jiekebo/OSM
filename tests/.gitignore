@@ -8,3 +8,5 @@
 /shell
 /threads
 /zombiegone
+/threads_locks
+/threads_ring
