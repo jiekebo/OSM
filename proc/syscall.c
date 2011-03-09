@@ -47,21 +47,31 @@
 #include "kernel/lock.h"
 #include "kernel/lock_cond.h"
 
+#include "fs/vfs.h"
+
 void syscall_exit(int retval)
 {
     process_finish(retval);
 }
 
-uint32_t syscall_write(uint32_t fd, char* s, int len)
-{
-    int count;
-    gcd_t *gcd;
-    if (fd != FILEHANDLE_STDOUT) {
-        KERNEL_PANIC("Can only write() to standard output.");
-    }
-    gcd = process_get_current_process_entry()->fds[1];
-    count = gcd->write(gcd, s, len);
-    return count;
+uint32_t syscall_open(char* filename){
+	return vfs_open(filename);
+}
+
+uint32_t syscall_close(uint32_t filehandle){
+	return vfs_close(filehandle);
+}
+
+uint32_t syscall_create(char* filename, int size){
+	return vfs_create(filename, size);
+}
+
+uint32_t syscall_delete(char* filename){
+	return vfs_remove(filename);
+}
+
+uint32_t syscall_seek(uint32_t filehandle, int offset){
+	return vfs_seek(filehandle, offset);
 }
 
 uint32_t syscall_read(uint32_t fd, char* s, int len)
@@ -73,6 +83,18 @@ uint32_t syscall_read(uint32_t fd, char* s, int len)
     }
     gcd = process_get_current_process_entry()->fds[0];
     count = gcd->read(gcd, s, len);
+    return count;
+}
+
+uint32_t syscall_write(uint32_t fd, char* s, int len)
+{
+    int count;
+    gcd_t *gcd;
+    if (fd != FILEHANDLE_STDOUT) {
+        KERNEL_PANIC("Can only write() to standard output.");
+    }
+    gcd = process_get_current_process_entry()->fds[1];
+    count = gcd->write(gcd, s, len);
     return count;
 }
 
@@ -150,17 +172,27 @@ void syscall_handle(context_t *user_context)
     case SYSCALL_EXIT:
         syscall_exit(user_context->cpu_regs[MIPS_REGISTER_A1]);
         break;
-    case SYSCALL_WRITE:
-        user_context->cpu_regs[MIPS_REGISTER_V0] =
-            syscall_write(user_context->cpu_regs[MIPS_REGISTER_A1],
-                          (char*)user_context->cpu_regs[MIPS_REGISTER_A2],
-                          (user_context->cpu_regs[MIPS_REGISTER_A3]));
-        break;
+    case SYSCALL_OPEN:
+    	break;
+    case SYSCALL_CLOSE:
+    	break;
+    case SYSCALL_CREATE:
+    	break;
+    case SYSCALL_DELETE:
+    	break;
+    case SYSCALL_SEEK:
+    	break;
     case SYSCALL_READ:
         user_context->cpu_regs[MIPS_REGISTER_V0] =
             syscall_read(user_context->cpu_regs[MIPS_REGISTER_A1],
                          (char*)user_context->cpu_regs[MIPS_REGISTER_A2],
                          (user_context->cpu_regs[MIPS_REGISTER_A3]));
+        break;
+    case SYSCALL_WRITE:
+        user_context->cpu_regs[MIPS_REGISTER_V0] =
+            syscall_write(user_context->cpu_regs[MIPS_REGISTER_A1],
+                          (char*)user_context->cpu_regs[MIPS_REGISTER_A2],
+                          (user_context->cpu_regs[MIPS_REGISTER_A3]));
         break;
     case SYSCALL_JOIN:
         user_context->cpu_regs[MIPS_REGISTER_V0] =
