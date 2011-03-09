@@ -54,32 +54,32 @@ void syscall_exit(int retval)
     process_finish(retval);
 }
 
-uint32_t syscall_open(char* filename){
-	return vfs_open(filename);
+uint32_t syscall_open(char* pathname){
+	return vfs_open(pathname);
 }
 
-uint32_t syscall_close(uint32_t filehandle){
-	return vfs_close(filehandle);
+uint32_t syscall_close(openfile_t file){
+	return vfs_close(file);
 }
 
-uint32_t syscall_create(char* filename, int size){
-	return vfs_create(filename, size);
+uint32_t syscall_create(char* pathname, uint32_t size){
+	return vfs_create(pathname, size);
 }
 
-uint32_t syscall_delete(char* filename){
-	return vfs_remove(filename);
+uint32_t syscall_delete(char* pathname){
+	return vfs_remove(pathname);
 }
 
-uint32_t syscall_seek(uint32_t filehandle, int offset){
-	return vfs_seek(filehandle, offset);
+uint32_t syscall_seek(openfile_t file, uint32_t seek_position){
+	return vfs_seek(file, seek_position);
 }
 
-uint32_t syscall_read(uint32_t fd, char* s, int len)
+uint32_t syscall_read(uint32_t fd, char* s, uint32_t len)
 {
     int count = 0;
     gcd_t *gcd;
     if (fd != FILEHANDLE_STDIN) {
-        KERNEL_PANIC("Can only read() from standard input.");
+        return vfs_read(fd, s, len);
     }
     gcd = process_get_current_process_entry()->fds[0];
     count = gcd->read(gcd, s, len);
@@ -91,7 +91,7 @@ uint32_t syscall_write(uint32_t fd, char* s, int len)
     int count;
     gcd_t *gcd;
     if (fd != FILEHANDLE_STDOUT) {
-        KERNEL_PANIC("Can only write() to standard output.");
+        return vfs_write(fd, s, len);
     }
     gcd = process_get_current_process_entry()->fds[1];
     count = gcd->write(gcd, s, len);
@@ -173,20 +173,32 @@ void syscall_handle(context_t *user_context)
         syscall_exit(user_context->cpu_regs[MIPS_REGISTER_A1]);
         break;
     case SYSCALL_OPEN:
+    	user_context->cpu_regs[MIPS_REGISTER_V0] =
+    			syscall_open((char*)user_context->cpu_regs[MIPS_REGISTER_A1]);
     	break;
     case SYSCALL_CLOSE:
+    	user_context->cpu_regs[MIPS_REGISTER_V0] =
+    		syscall_close((openfile_t)user_context->cpu_regs[MIPS_REGISTER_A1]);
     	break;
     case SYSCALL_CREATE:
+    	user_context->cpu_regs[MIPS_REGISTER_V0] =
+    		syscall_create((char*)user_context->cpu_regs[MIPS_REGISTER_A1],
+    				user_context->cpu_regs[MIPS_REGISTER_A2]);
     	break;
     case SYSCALL_DELETE:
+    	user_context->cpu_regs[MIPS_REGISTER_V0] =
+    		syscall_delete((char*)user_context->cpu_regs[MIPS_REGISTER_A1]);
     	break;
     case SYSCALL_SEEK:
+    	user_context->cpu_regs[MIPS_REGISTER_V0] =
+    		syscall_seek((openfile_t)user_context->cpu_regs[MIPS_REGISTER_A1],
+    				user_context->cpu_regs[MIPS_REGISTER_A2]);
     	break;
     case SYSCALL_READ:
         user_context->cpu_regs[MIPS_REGISTER_V0] =
             syscall_read(user_context->cpu_regs[MIPS_REGISTER_A1],
-                         (char*)user_context->cpu_regs[MIPS_REGISTER_A2],
-                         (user_context->cpu_regs[MIPS_REGISTER_A3]));
+            		(char*)user_context->cpu_regs[MIPS_REGISTER_A2],
+            		(user_context->cpu_regs[MIPS_REGISTER_A3]));
         break;
     case SYSCALL_WRITE:
         user_context->cpu_regs[MIPS_REGISTER_V0] =
