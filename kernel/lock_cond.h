@@ -1,25 +1,26 @@
-/*
- * lock_cond.h
- *
- *  Created on: Mar 4, 2011
- *      Author: arkimedes
- */
+#ifndef BUENOS_PROC_LOCK_COND
+#define BUENOS_PROC_LOCK_COND
 
-#ifndef LOCK_COND_H_
-#define LOCK_COND_H_
-
+#include "kernel/thread.h"
 #include "kernel/spinlock.h"
 
 typedef struct {
-	spinlock_t spinlock;
-	int locked;
+  int taken;
+  spinlock_t spinlock;
+} lock_t;
+
+typedef struct {
+  int unused; // We only have the field to make conditions adressable.
 } cond_t;
 
-typedef cond_t usr_cond_t;
 
-int condition_reset(cond_t *cond);
-void condition_wait(cond_t * cond, lock_t *condition_lock);
-void condition_signal(cond_t *cond, lock_t *condition_lock);
-void condition_broadcast(cond_t *cond, lock_t *condition_lock);
+int lock_reset(lock_t *lock);
+void lock_acquire(lock_t *lock);
+void lock_release(lock_t *lock);
 
-#endif /* LOCK_COND_H_ */
+int cond_reset(cond_t *cond);
+void cond_wait(cond_t *cond, lock_t *condition_lock);
+void cond_signal(cond_t *cond, lock_t *condition_lock);
+void cond_broadcast(cond_t *cond, lock_t *condition_lock);
+
+#endif

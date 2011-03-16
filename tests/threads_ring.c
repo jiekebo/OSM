@@ -24,13 +24,11 @@ typedef struct thread_data {
 void thread_function(void *arg){
     thread_data *data = (thread_data *)arg;
     while(1) {
-
-        syscall_lock_acquire(&baton_lock);
-        
+      syscall_lock_acquire(&baton_lock);
         // Wait until baton is non-zero (meaning that the thread
         // has the baton)
         while(data->baton == 0) {
-            syscall_condition_wait(&data->cond, &baton_lock);
+          syscall_condition_wait(&data->cond, &baton_lock);
         }
 
         // First thread should perform countdown
@@ -49,22 +47,23 @@ void thread_function(void *arg){
         // Quit if the baton was a stop baton
         if(data->baton < 0){
             printf("%d: I quit.\n",data->id);
-            syscall_lock_release(&baton_lock);
             syscall_condition_signal(&data->next->cond,
                     &baton_lock);
+            syscall_lock_release(&baton_lock);
             syscall_exit(0);
         }
 
         //Remove baton from self and signal the next thread
         data->baton = 0;
-        syscall_lock_release(&baton_lock);
         syscall_condition_signal(&data->next->cond, &baton_lock);
+        syscall_lock_release(&baton_lock);
     }
 }
 
 
 int main() {
     syscall_lock_create(&baton_lock);
+    syscall_lock_acquire(&baton_lock);
 
     // Setup data for threads
     thread_data data[THREADS];
@@ -84,6 +83,7 @@ int main() {
 
     // Start first thread
     syscall_condition_signal(&data[0].cond, &baton_lock);
+    syscall_lock_release(&baton_lock);
 
     syscall_exit(0);
     return 0;

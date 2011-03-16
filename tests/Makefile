@@ -37,8 +37,8 @@
 
 # Add your _userland_ program sources to this variable:
 SOURCES  := halt.c hw.c exec.c calc.c counter.c shell.c \
-	    zombiegone.c badexec.c hello.c threads.c threads_locks.c \
-	    threads_ring.c
+	    zombiegone.c badexec.c hello.c threads.c threads_ring.c \
+	    threads_locks.c
 
 OBJECTS  := $(patsubst %.c, %.o, $(SOURCES))
 TARGETS  := $(patsubst %.o, %, $(OBJECTS))

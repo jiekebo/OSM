@@ -416,7 +416,6 @@ void finish_given_process(process_id_t pid, int retval)
  */
 void process_finish(int retval)
 {
-	//TODO: Check if somehting is missing from G2
     interrupt_status_t intr_status;
     thread_table_t *thread = thread_get_current_thread_entry();
     process_id_t pid = thread->process_id;

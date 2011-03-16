@@ -55,7 +55,7 @@ CFLAGS  += -g -G0 -O2 -I. -Wall -W -Werror $(CHANGEDFLAGS)
 LDFLAGS := --script=ld.script --cref -G0 -Map buenos.map
 ASFLAGS := -gstabs+ -I. -Wa,-mips32 $(CHANGEDFLAGS)
 # -G0 is needed to avoid GP optimization (LD won't link if it is used)
-GTAR    := gtar
+GTAR    := tar
 
 # Each module adds to this
 SRC :=
